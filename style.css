@@ -1,0 +1,119 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+ul li {
+  list-style-type: none;
+}
+
+.wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  max-width: 650px;
+  /* grid mode , with flexible boxes that cannot go beyond 650px */
+  gap: 16px;
+  padding: 16px 0;
+  margin: 0 auto;
+  perspective: 1000px;
+  /* we set the 3D env here, that would be an issue for phone, as the wrapper will be taller
+  and the animation will become weird
+  */
+}
+.item img {
+  display: block;
+  /* it's a good habit to turn the img to block instead of its natural inline,
+  to remove the magical space that come with inline elements
+  */
+  width: 100%;
+  /* the img will only be as wide as its container, which is restrained by the grid specifications */
+  height: 200px;
+  /* the height is fixed */
+  object-fit: cover;
+  /* the images will zoom in, adding a nice effect */
+}
+.front,
+.back {
+  will-change: transform;
+  /* inform the browser to pass the animation to the GPU */
+  backface-visibility: hidden;
+  /* both sides will have their back invisible */
+  /* Vendor prefix for Safari */
+  -webkit-backface-visibility: hidden;
+}
+.back {
+  /* the tricky part */
+  position: absolute;
+  /* make the back stack on top of the front, relatively to their closest parent */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  /* flex for arranging its children */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  color: black;
+  transform: rotateY(-180deg);
+  /* initially, its turned to the back. Basically it's invisible at this stage because of backface
+  invisibility we sat earlier
+  */
+}
+.item figure {
+  position: relative;
+  /* here is their closest parent,
+   in fact any part would have worked as all descendants occupy the same space
+   but better target the closet parent
+   */
+}
+.item a:hover .front,
+.item a:focus .front {
+  /* front rotation on hover */
+  transform: rotateY(180deg);
+}
+.item a:hover .back,
+.item a:focus .back {
+  /* back goes back to initial state on hover. we flipped it earlier */
+  /* note that hovering any element here is hovering the over */
+  transform: rotateY(0deg);
+}
+@supports (aspect-ratio: 1 / 1) {
+  /* for browsers that don't support aspect-ratio yet, we have to use a fixed height earlier
+    here we are overriding that to use this cool property
+    */
+  .item img {
+    height: revert;
+    aspect-ratio: 1 / 1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* as you would have noticed already, we have not set any transition yet
+    we will only do that for users who have no reduce motion settings
+    */
+  .item a:hover .front,
+  .item a:focus .front {
+    transition: transform 400ms;
+  }
+  .item a:hover .back,
+  .item a:focus .back {
+    transition: transform 400ms;
+  }
+  .front,
+  .back {
+    transition: transform 800ms 150ms;
+  }
+  .back {
+    /* a different color preference as it's not as strong when flipping slowly */
+    background-color: black;
+    color: white;
+  }
+}
